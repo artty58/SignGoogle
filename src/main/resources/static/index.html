@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>Demo</title>
+<meta name="description" content="" />
+<meta name="viewport" content="width=device-width" />
+<base href="/" />
+<link rel="stylesheet" type="text/css"
+    href="/webjars/bootstrap/css/bootstrap.min.css" />
+<script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+<script type="text/javascript"
+    src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <h1>Login</h1>
+    <div class="container unauthenticated">
+
+        <div id="Go">
+            With Google: <a href="/google/login">click here</a>
+        </div>
+    </div>
+
+    <div class="container authenticated" style="display: none">
+        Logged in as: <span id="user"></span>
+        Logged in as: <span id="email"></span>
+
+        <div>
+            <button onClick="logout()" class="btn btn-primary">Logout</button>
+        </div>
+    </div>
+    <div class="container" style="background-color: #f1f3f0">
+
+
+        <table class="table table-hover" id="table1" style="color: black">
+
+
+            <thead STYLE="background-color: cornflowerblue">
+            <tr>
+
+                <th>ID</th>
+                <th>USERNAME</th>
+                <th>PASSWORD</th>
+                <th>FIRSTNAME</th>
+                <th>LASTNAME</th>
+                <th>TELEPHONE</th>
+                <th>ADDRESS</th>
+
+
+
+            </tr>
+            </thead>
+            <tbody>
+
+            </tbody>
+
+        </table>
+
+
+    </div>
+
+
+
+
+
+
+    <script>
+
+        $("#table1").hide();
+</script>
+    <script type="text/javascript" src="/webjars/js-cookie/js.cookie.js"></script>
+
+    <script type="text/javascript">
+          $.ajaxSetup({
+            beforeSend : function(xhr, settings) {
+              if (settings.type == 'POST' || settings.type == 'PUT'
+                  || settings.type == 'DELETE') {
+                if (!(/^http:.*/.test(settings.url) || /^https:.*/
+                    .test(settings.url))) {
+                  // Only send the token to relative URLs i.e. locally.
+                  xhr.setRequestHeader("X-XSRF-TOKEN", Cookies
+                      .get('XSRF-TOKEN'));
+                }
+              }
+            }
+          });
+
+    var name ="";
+          $.get("/user", function(data) {
+            $("#user").html(data.name);
+            $("#email").html(data.email);
+              name = data.name;
+              email = data.email;
+              console.log(data);
+            $(".unauthenticated").hide();
+            $(".authenticated").show();
+
+        if (email) {
+            var dataSign = $.ajax({
+                type: "GET",
+                url: "http://localhost:8080/sign/findByUser?email=" + email,
+                headers: {
+                    Accept: "application/json"
+                },
+                type: "GET",
+                async: false
+
+            }).responseJSON;
+
+            $("#table1").show();
+            $.each(dataSign, function (index, item) {
+
+                $("tbody").append("<tr>" +
+                    "<td>" + item.id + "</td>" +
+                    "<td>" + item.userName + "</td>" +
+                    "<td>" + item.password + "</td>" +
+                    "<td>" + item.firstName + "</td>" +
+                    "<td>" + item.lastName + "</td>" +
+                    "<td>" + item.telePhone + "</td>" +
+                    "<td>" + item.address + "</td>" +
+                    "</tr>");
+
+
+                });
+              }
+          });
+
+
+     var logout = function () {
+         $.post("/logout", function () {
+             $("#user").html('');
+             $(".unauthenticated").show();
+             $(".authenticated").hide();
+             $("tbody").empty();
+             $("#table1").hide();
+
+         })
+         return true;
+     }
+
+        </script>
+</body>
+</html>
+
+
